@@ -1,0 +1,60 @@
+// ---------------------------------------------------------------------------
+// NeoForge 26.x platform modules (Minecraft 26.x: Java 25 + ModDevGradle).
+//
+// These modules live next to the legacy platform modules (forge-1.19.3, ...)
+// but carry their own Gradle 9 wrapper, because this repo's legacy Gradle
+// 8.14 wrapper cannot run that toolchain: Gradle 8.14 cannot even start on a
+// Java 25 JVM (Groovy cannot parse class file version 69) and ModDevGradle
+// requires Java 17+, while the legacy Java 8 platforms cannot be configured
+// under Java 21+ JVMs (fabric-loom). The tasks below fork each module's own
+// wrapper with a Java 25 toolchain and collect the jars in target/ like every
+// other platform module.
+//
+// Usage (from the repo root):
+//   ./neoforge-build.sh                      # build every neoforge-26.x module
+//   ./neoforge-build.sh neoforge-26.1.2      # build a single module
+//   ./gradlew -b build-neoforge.gradle neoforge-26.1.2   # gradle-native form
+//   NEOFORGE_JAVA_HOME=/path/to/jdk-25 ./neoforge-build.sh  # pick the JVM
+//
+// This script is self-contained: it also works when applied from the main
+// build.gradle (apply from: 'build-neoforge.gradle') and as an alternate
+// build script (-b build-neoforge.gradle), which bypasses settings.gradle so
+// the legacy modules are never configured.
+// ---------------------------------------------------------------------------
+
+def neoforgeModules = ['neoforge-26.1.2', 'neoforge-26.2', 'neoforge-26.3']
+        .findAll { new File(projectDir, it).isDirectory() }
+
+// Java 25 toolchain used to run the module builds. Override with
+// NEOFORGE_JAVA_HOME; otherwise a few well-known locations are probed.
+def neoforgeJavaHome = System.getenv('NEOFORGE_JAVA_HOME') ?: [
+        '/usr/java/jdk-25-oracle-aarch64',
+        '/usr/java/jdk-25',
+        '/usr/lib/jvm/java-25-openjdk',
+        '/usr/lib/jvm/java-25-oracle-aarch64',
+        "${System.getProperty('user.home')}/.jdks/jdk-25",
+].find { it != null && new File(it).isDirectory() }
+
+neoforgeModules.each { mod ->
+    tasks.register(mod, Exec) {
+        group = 'Dynmap'
+        description = "Builds the ${mod} NeoForge platform module (delegates to its Gradle 9 wrapper with a Java 25 toolchain)."
+        workingDir = new File(projectDir, mod)
+        commandLine new File(projectDir, "${mod}/gradlew").absolutePath, 'build'
+        environment 'JAVA_HOME', neoforgeJavaHome
+        doFirst {
+            if (neoforgeJavaHome == null) {
+                throw new GradleException(
+                    "No Java 25 toolchain found for ${mod}. Set NEOFORGE_JAVA_HOME to a JDK 25 installation.")
+            }
+        }
+    }
+}
+
+if (neoforgeModules) {
+    tasks.register('neoforge') {
+        group = 'Dynmap'
+        description = "Builds all NeoForge 26.x platform modules with a Java 25 toolchain (${neoforgeModules.join(', ')})."
+        dependsOn neoforgeModules
+    }
+}

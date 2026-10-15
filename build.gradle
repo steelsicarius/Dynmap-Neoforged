@@ -52,7 +52,7 @@ ext {
   globals = new Globals()
 }
 
-subprojects {  
+subprojects {
   apply plugin: "io.github.goooler.shadow"
   apply plugin: 'java'
   apply plugin: 'maven-publish'
@@ -70,3 +70,7 @@ clean {
 
 task setupCIWorkspace {
 }
+
+// NeoForge 26.x platform modules (Minecraft 26.x) - see build-neoforge.gradle.
+// Also usable standalone with: ./gradlew -b build-neoforge.gradle <module>
+apply from: 'build-neoforge.gradle'
