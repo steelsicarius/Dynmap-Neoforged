@@ -1,0 +1,13 @@
+package org.dynmap.neoforge_26_3;
+
+import net.minecraft.server.level.ServerLevel;
+import org.dynmap.DynmapLocation;
+
+public final class NeoForgeAdapter {
+    public static DynmapLocation toDynmapLocation(DynmapPlugin plugin, ServerLevel world, double x, double y, double z) {
+        return new DynmapLocation(plugin.getWorld(world).getName(), x, y, z);
+    }
+
+    private NeoForgeAdapter() {
+    }
+}

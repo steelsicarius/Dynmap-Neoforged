@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "package": "org.dynmap.neoforge_26_3.mixin",
+  "minVersion": "0.8",
+  "mixins": [
+    "LevelChunkMixin",
+    "ServerGamePacketListenerImplMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

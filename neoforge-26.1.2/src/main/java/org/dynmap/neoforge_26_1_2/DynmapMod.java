@@ -38,16 +38,36 @@ public class DynmapMod {
                 // classes directory, but DynmapCore reads its bundled
                 // resources (extracted/web, colorschemes, renderdata...) from
                 // the plugin jar as a zip - so point it at the built fat jar
-                // (requires a prior './gradlew build').
-                File libs = p.getParent().getParent().getParent().resolve("libs").toFile();
-                File[] jars = (libs.isDirectory())
-                        ? libs.listFiles((dir, name) -> name.startsWith("Dynmap-") && name.endsWith(".jar"))
-                        : null;
-                if (jars != null && jars.length > 0) {
-                    jarfile = jars[0];
+                // (requires a prior './gradlew build'). The jar lands in the
+                // repo root target/ dir (../target from this module); also
+                // probe the module-local build/libs for older layouts.
+                File projectDir = null;
+                for (File dir = f; dir != null; dir = dir.getParentFile()) {
+                    if (new File(dir, "build").isDirectory() && new File(dir, "src").isDirectory()) {
+                        projectDir = dir;
+                        break;
+                    }
+                }
+                File[] searchDirs = (projectDir != null)
+                        ? new File[]{ new File(projectDir.getParentFile(), "target"),
+                                       new File(projectDir, "build/libs") }
+                        : new File[]{};
+                File found = null;
+                for (File dir : searchDirs) {
+                    File[] jars = dir.isDirectory()
+                            ? dir.listFiles((d, name) -> name.startsWith("Dynmap-") && name.endsWith(".jar"))
+                            : null;
+                    if (jars != null && jars.length > 0) {
+                        found = jars[0];
+                        break;
+                    }
+                }
+                if (found != null) {
+                    jarfile = found;
                 } else {
                     Log.warning("Dynmap mod is not running from a jar and no built Dynmap jar was found in "
-                            + libs + " - run './gradlew build' to enable bundled resource extraction");
+                            + String.join(", ", java.util.Arrays.stream(searchDirs).map(File::getPath).toArray(String[]::new))
+                            + " - run 'gradlew build' to enable bundled resource extraction");
                 }
             }
         } catch (Exception e) {

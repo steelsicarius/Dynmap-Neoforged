@@ -6,17 +6,25 @@ Port of [Dynmap](https://github.com/webbukkit/dynmap) (v3.0 branch, `3.9-SNAPSHO
 - Port base: the upstream `fabric-1.21.11` platform module (Yarn mappings), converted to
   Mojang mappings and NeoForge APIs.
 - Mojang-mapped API reference: the upstream `forge-1.21.11` platform module of the same repo.
-- Shared core (`DynmapCore`/`DynmapCoreAPI`) is compiled **in place** from the read-only
-  origin checkout at `../dynmap` (see `build.gradle`), exactly like the upstream platform
-  builds embed it, so the origin repo is never modified and the core stays byte-identical.
+- Shared core (`DynmapCore`/`DynmapCoreAPI`) is compiled **in place** from the dynmap repo
+  this module lives in (`..` is the repo root, like every other platform module folder),
+  so the core stays byte-identical across platforms.
 
 ## Build
 
+This module can be built two ways:
+
 ```bash
+# Integrated (from the dynmap repo root; forks this module's own Gradle 9 wrapper
+# with a Java 25 toolchain):
+./neoforge-build.sh neoforge-26.1.2
+
+# Standalone (from this folder, with its own Gradle 9 wrapper):
 JAVA_HOME=/usr/java/jdk-25-oracle-aarch64 ./gradlew build
 ```
 
-Output: `build/libs/Dynmap-3.9-SNAPSHOT-neoforge-26.1.2.jar` — a self-contained fat jar
+Output: `../target/Dynmap-3.9-SNAPSHOT-neoforge-26.1.2.jar` (repo root `target/`, like
+every other platform module) — a self-contained fat jar
 with DynmapCore + its third-party libraries shaded and relocated (`org.dynmap.jetty`,
 `org.dynmap.snakeyaml`, `org.dynmap.json.simple`, `org.dynmap.org.postgresql`,
 `org.dynmap.s3lite`, `org.dynmap.javax.servlet`, `org.dynmap.org.owasp.html`),
@@ -110,8 +118,8 @@ by `Main.main`'s `catch (Throwable)`). The `shadowJar` block now excludes
 and `org/hamcrest` (plus `META-INF/maven`) by real package path — mirroring upstream's
 DynmapCore include-allowlist and the fabric module's guava filter.
 
-## Origin checkout
+## DynmapCore sources
 
-`../dynmap` (read-only) is expected to be the upstream v3.0 checkout (group `us.dynmap`,
-version `3.9-SNAPSHOT`). Only `DynmapCore/` and `DynmapCoreAPI/` sources/resources are
-consumed from it.
+The dynmap repo root (`..`) is the upstream v3.0 checkout (group `us.dynmap`, version
+`3.9-SNAPSHOT`). Only `DynmapCore/` and `DynmapCoreAPI/` sources/resources are consumed
+from it.
