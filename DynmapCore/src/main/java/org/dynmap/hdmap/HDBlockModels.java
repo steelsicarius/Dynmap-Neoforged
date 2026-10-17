@@ -537,7 +537,9 @@ public class HDBlockModels {
                     }
                     else {
                         Log.severe("Invalid rotate error - line " + lineNum + " of file: " + fname);
-                        return;
+                        // Skip just this line - do not abort the rest of the file (a source model
+                        // skipped by a version filter must not discard every later block model).
+                        continue;
                     }
                 }
                 else if (typeid.equals("ignore-updates")) {
