@@ -31,28 +31,6 @@ with DynmapCore + its third-party libraries shaded and relocated (`org.dynmap.je
 mirroring the upstream `DynmapCore` shadow jar relocations. Guava is **not** bundled
 (Minecraft ships its own copy, as in the upstream builds).
 
-## Dev server
-
-```bash
-JAVA_HOME=/usr/java/jdk-25-oracle-aarch64 ./gradlew build       # resources are read from this jar in dev runs
-JAVA_HOME=/usr/java/jdk-25-oracle-aarch64 ./gradlew runServer   # binds 0.0.0.0:25599 (--nogui)
-```
-
-`25565` is already taken on this host, so the dev run passes `--port 25599`. The dev JVMs
-also force `-Djava.net.preferIPv4Stack=true` (this host has no IPv6 stack). The web UI is
-served on the Dynmap default port `8123` once the core enables; check `run/dynmap/configuration.txt`
-after the first boot to change it.
-
-Two dev-run notes (verified on this host):
-
-- In a ModDevGradle run the mod "file" is the exploded classes directory, so `DynmapMod`
-  points the plugin jar at the built fat jar (`build/libs/Dynmap-*.jar`) — run `./gradlew build`
-  before `runServer`, or the bundled resource extraction (web client, colorschemes, renderdata)
-  is disabled.
-- Vanilla pauses a dedicated server (and stops ticking, which stops dynmap's render
-  dispatcher) after `pause-when-empty-seconds` (60 by default) with no players. For
-  headless render tests set `pause-when-empty-seconds=0` in `run/server.properties`.
-
 ## Runtime validation (dev server)
 
 Verified with `runServer` on port 25599: mod + both mixins apply cleanly; DynmapCore
