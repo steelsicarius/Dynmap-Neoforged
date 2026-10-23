@@ -1,5 +1,7 @@
 # Dynmap®  - dynamic web maps for Minecraft servers
 
+Unoficial Neoforge update of webbukkit/dynmap
+
 # Jump around the README
 * [How to build](#how-to-build)
 * [What platforms are supported?](#what-platforms-are-supported)
